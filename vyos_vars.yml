@@ -1,0 +1,54 @@
+---
+
+# General Variables
+server: "3906_1"
+netconf_uid: user
+netconf_pwd: ciena123
+
+# Classifier Variables
+# Arange this as a list so that Jinja2 loops through it
+lan_clsfr_name: VLAN-30
+lan_clsfr_vid: 30
+wan_clsfr_name: VLAN-40
+wan_clsfr_vid: 40
+
+# VNF Variables
+# Arange this as a list so that Jinja2 loops through it
+vnf_name: Vyos
+cpu: 4
+memory: 6144
+image_path: ftp://10.181.35.53/vyos.qcow2
+image_size: 361
+ftp_uid: ftp
+ftp_pwd: ftp
+
+mgmt_name: mgmt
+
+wan_name: eth2
+wan_ntwk_type: vhost
+wan_log_port: vnet-1
+
+lan_name: eth1
+lan_ntwk_type: vhost
+lan_log_port: vnet-0
+
+# Arange this whole section so that it can loop through and create
+# links to the VNF ports to properly create the service chain. This 
+# will likely require a lot of Jinja2 programming.
+
+# SFFS Variables - LAN 
+fd_lan_name: FD-LAN
+fd_lan_mode: vpws
+fd_lan_iport_name: FD-LAN-1
+fd_lan_iport_lp: "1"
+fd_lan_hport_name: FD-LAN-vnet0
+fd_lan_hport_lp: vnet-0
+
+# SFFS Variables - WAN
+fd_wan_name: FD-WAN
+fd_wan_mode: vpws
+fd_wan_iport_name: FD-WAN-2
+fd_wan_iport_lp: "2"
+fd_wan_hport_name: FD-WAN-vnet1
+fd_wan_hport_lp: vnet-1
+
