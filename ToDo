@@ -1,0 +1,5 @@
+- Single line format for "shows" to allow for grep pipeline
+- Color added to single line for clarity?
+- NodeName context??
+- Command completion?
+- 

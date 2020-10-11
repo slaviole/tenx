@@ -1,0 +1,20 @@
+<config>
+  <pseudowires xmlns="urn:ietf:params:xml:ns:yang:ietf-pseudowires">
+    <pseudowire>
+    <name>{{ pwName }}</name>
+      <mtu>1500</mtu>
+      <cw-negotiation>non-preferred</cw-negotiation>
+      <configured-pw>
+          <peer-ip>{{ peerIp }}</peer-ip>
+          <pw-id>{{ pwid }}</pw-id>
+        <pw-status xmlns="http://ciena.com/ns/yang/ciena-ietf-pseudowires">false</pw-status>
+        <pw-status-refresh-timer xmlns="http://ciena.com/ns/yang/ciena-ietf-pseudowires">600</pw-status-refresh-timer>
+      </configured-pw>
+      <role xmlns="http://ciena.com/ns/yang/ciena-ietf-pseudowires" xmlns:cnpw="http://ciena.com/ns/yang/ciena-ietf-pseudowires">cnpw:primary</role>
+      <protect xmlns="http://ciena.com/ns/yang/ciena-ietf-pseudowires">false</protect>
+      <mode xmlns="http://ciena.com/ns/yang/ciena-ietf-pseudowires">mesh</mode>
+      <stats-collection xmlns="http://ciena.com/ns/yang/ciena-ietf-pseudowires">on</stats-collection>
+      <pw-loadbalance xmlns="http://ciena.com/ns/yang/ciena-ietf-pseudowires">disabled</pw-loadbalance>
+    </pseudowire>
+  </pseudowires>
+</config>

@@ -1,4 +1,5 @@
 click
+jinja2
 ncclient
 pyaml
 requests

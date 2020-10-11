@@ -1,0 +1,17 @@
+<config>  
+  <files xmlns="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-file-mgmt">
+    <file>
+        <file-name>{{ vnfName }}</file-name>
+        <file-mgmt>
+            <file-identifier>{{ vnfName }}</file-identifier>
+            <file-download-uri>{{ image_path }}</file-download-uri>
+            <file-download-size>{{ image_size }}</file-download-size>
+            <file-max-size>{{ image_max_size }}</file-max-size>
+            <checksum-uri>{{ image_checksum }}</checksum-uri>
+            <checksum-type>md5</checksum-type>
+            <username>{{ sftp_username }}</username>
+            <password>{{ sftp_password }}</password>
+        </file-mgmt>
+    </file>
+  </files>
+</config>

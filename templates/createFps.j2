@@ -1,0 +1,11 @@
+<config>
+  <fps xmlns="urn:ciena:params:xml:ns:yang:ciena-pn:ciena-mef-fp">
+  {% for fp in fps %}
+    <fp>
+      <name>{{ fp.fpname }}</name>
+      <fd-name>{{ fp.fdname }}</fd-name>
+      <logical-port>{{ fp.logPort }}</logical-port>
+    </fp>
+  {% endfor %}
+  </fps>
+</config>

@@ -1,0 +1,22 @@
+<config>  
+  <files xmlns="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-file-mgmt">
+  {% for image in images %}
+    <file>
+        <file-name>{{ image.imageName }}</file-name>
+        <file-mgmt>
+            {% if image.isCloudInit %}
+                <file-type>{{ image.fileType }}</file-type>
+            {% endif %}
+            <file-identifier>{{ image.imageName }}</file-identifier>
+            <file-download-uri>{{ image.image_path }}</file-download-uri>
+            <file-download-size>{{ image.image_size }}</file-download-size>
+            <file-max-size>{{ image.image_max_size }}</file-max-size>
+            <checksum-uri>{{ image.image_checksum }}</checksum-uri>
+            <checksum-type>md5</checksum-type>
+            <username>{{ image.sftp_username }}</username>
+            <password>{{ image.sftp_password }}</password>
+        </file-mgmt>
+    </file>
+    {% endfor %}
+  </files>
+</config>

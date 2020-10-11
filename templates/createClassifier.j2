@@ -1,0 +1,28 @@
+<config>  
+  <classifiers>
+    {% if createUntaggedClassifier  %}
+    <classifier>
+      <name>Untagged</name>
+      <filter-entry>
+        <filter-parameter xmlns:classifier="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-mef-classifier">classifier:vtag-stack</filter-parameter>
+        <logical-not>false</logical-not>
+        <untagged-exclude-priority-tagged>true</untagged-exclude-priority-tagged>
+      </filter-entry>
+    </classifier>
+    {% endif %}
+
+    {% for classifier in taggedClassifiers %}
+    <classifier operation="replace">
+      <name>VLAN{{classifier}}</name>
+      <filter-entry>
+        <filter-parameter xmlns:classifier="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-mef-classifier">classifier:vtag-stack</filter-parameter>
+        <logical-not>false</logical-not>
+        <vtags>
+          <tag>1</tag>
+          <vlan-id>{{classifier}}</vlan-id>
+        </vtags>
+      </filter-entry>
+    </classifier>
+    {% endfor %}
+  </classifiers>
+</config>

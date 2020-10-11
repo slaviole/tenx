@@ -1,0 +1,9 @@
+<config>  
+  <sffs xmlns="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-sfc">
+    {% for fd in fds %} 
+    <sff operation="delete">
+      <sff-name>{{ fd.fdname }}</sff-name>
+   </sff>
+   {% endfor %}
+  </sffs>
+</config>

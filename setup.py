@@ -9,7 +9,8 @@ setup(
             'requests',
             'untangle',
             'pyaml',
-            'ncclient'
+            'ncclient',
+            'jinja2'
             ],
         entry_points='''
             [console_scripts]

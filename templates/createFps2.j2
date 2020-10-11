@@ -1,0 +1,31 @@
+<config>
+  <fps xmlns="urn:ciena:params:xml:ns:yang:ciena-pn:ciena-mef-fp">
+  {% for fp in fds.fps %}
+    <fp>
+      <name>{{ fp.fpname }}</name>
+      <fd-name>{{ fp.fdname }}</fd-name>
+      <logical-port>{{ fp.logPort }}</logical-port>
+      <mtu-size>9000</mtu-size>
+      <classifier-list>VLAN{{ fp.classifier }}</classifier-list>
+      {% if fp.wanLink %}
+        <ingress-l2-transform>            
+            <ingress-name>pop-{{ fp.classifier }}</ingress-name>
+            <vlan-stack>
+                <tag>1</tag>
+                <pop-type/>
+            </vlan-stack>
+        </ingress-l2-transform>
+        <egress-l2-transform>
+            <egress-name>push-{{ fp.classifier }}.{{ fp.stagEthertype }}.{{ fp.stagPbit }}</egress-name>
+            <vlan-stack>
+                <tag>1</tag>
+                <push-tpid>tpid-{{ fp.stagEthertype }}</push-tpid>
+                <push-pcp>pcp-{{ fp.stagPbit }}</push-pcp>
+                <push-vid>{{ fp.classifier }}</push-vid>
+            </vlan-stack>
+        </egress-l2-transform>
+      {% endif %}
+    </fp>
+  {% endfor %}
+  </fps>
+</config>

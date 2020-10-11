@@ -1,0 +1,27 @@
+---
+
+- name: Get Flow Domain information
+  hosts: "5170_93"
+  connection: netconf
+  gather_facts: false
+  tasks:
+      - name: "TASK1: Get filtered output from switch"
+        netconf_get:
+          filter: <pseudowires></pseudowires>
+        register: result
+      - name: "TASK2: Format XML for easy viewing"
+        xml:
+          xmlstring: "{{ result.stdout }}"
+          pretty_print: true
+        register: pretty_config
+        changed_when: false
+      - name: "TASK3: Ensure output folder exists"
+        file:
+            path: "outputs"
+            state: directory
+        run_once: true
+      - name: "TASK4: Write XML to disk"
+        copy:
+            content: "{{ pretty_config.xmlstring }}"
+            dest: "outputs/{{inventory_hostname}}_pw_netconf.xml"
+

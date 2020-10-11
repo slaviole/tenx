@@ -3,6 +3,7 @@ from ncclient import manager
 import requests
 import untangle
 import click
+from jinja2 import Template
 #import yaml
 
 
@@ -24,6 +25,25 @@ def get_nc_obj(nc_creds, filter):
     data_str = str(data)
     d_obj = untangle.parse(data_str)
     return d_obj
+
+def edit_nc_obj(nc_creds, template):
+    ''' Takes D-NFVI server login credentials, makes a Netconf get for all config and oper data.
+        Returns an Untangle object with the parsed xml tree.
+    '''
+    with manager.connect(host=nc_creds['ip'],
+                             port=830,
+                             username=nc_creds['user'],
+                             password=nc_creds['pwd'],
+                             hostkey_verify=False,
+                             allow_agent=False,
+                             look_for_keys=False
+                             ) as netconf_manager:
+
+        data = netconf_manager.edit_config(target='running', config=template)
+    data_str = str(data)
+    d_obj = untangle.parse(data_str)
+    return d_obj
+
 
 def view_clsfr(obj):
     ''' Takes an Untangle Object as Input, parses it, and prints out Field names and values
@@ -108,7 +128,7 @@ def view_fds(obj):
             print()
             print('FD Name: ', item.name.cdata)
             print('FD Mode:', item.mode.cdata)
-  
+
     except:
         print("No FDs found")
 
@@ -123,7 +143,7 @@ def view_fps(obj):
             print('Fp Name: ', item.name.cdata)
             print('FD Name: ', item.fd_name.cdata)
             print('Logical Port: ', item.logical_port.cdata)
-  
+
     except:
         print("No FPs found")
 
@@ -134,10 +154,11 @@ def view_interfaces(obj):
     '''
     try:
         for item in obj.rpc_reply.data.interfaces.interface:
-            print()
-            print('Interface Name: ', item.name.cdata)
-           # print('IP Address: ', item.ipv4.addresses.ip.cdata)
-  
+            if len(item.name.cdata) > 2:
+                print()
+                print('Interface Name: ', item.name.cdata)
+            # print('IP Address: ', item.ipv4.addresses.ip.cdata)
+
     except:
         print("No Interfaces found")
 
@@ -149,6 +170,35 @@ classifiers_filter = '''
         </classifiers>
     </filter>
     '''
+
+createClassifiers = Template('''
+        <config>  
+          <classifiers>
+            {% if vlanid=='untagged'  %}
+                <classifier>
+                <name>Untagged</name>
+                <filter-entry>
+                    <filter-parameter xmlns:classifier="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-mef-classifier">classifier:vtag-stack</filter-parameter>
+                    <logical-not>false</logical-not>
+                    <untagged-exclude-priority-tagged>true</untagged-exclude-priority-tagged>
+                </filter-entry>
+                </classifier>
+            {% else %}
+                <classifier operation="replace">
+                <name>VLAN{{vlanid}}</name>
+                <filter-entry>
+                    <filter-parameter xmlns:classifier="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-mef-classifier">classifier:vtag-stack</filter-parameter>
+                    <logical-not>false</logical-not>
+                    <vtags>
+                    <tag>1</tag>
+                    <vlan-id>{{vlanid}}</vlan-id>
+                    </vtags>
+                </filter-entry>
+                </classifier>
+            {% endif %}
+          </classifiers>
+        </config>
+    ''')
 
 sffs_filter = '''
     <filter xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:ncx="http://netconfcentral.org/ns/yuma-ncx">
@@ -199,7 +249,7 @@ interfaces_filter = '''
 
 
 
-creds = {'ip': '10.181.34.2', 'user': 'user', 'pwd': 'ciena123'}
+creds = {'ip': '10.181.35.55', 'user': 'user', 'pwd': 'ciena123'}
 
 @click.group()
 def cli():
@@ -239,8 +289,23 @@ def interfaces():
     dnfvi_obj = get_nc_obj(creds, interfaces_filter)
     view_interfaces(dnfvi_obj)
 
+@cli.group()
+def create():
+    pass
+
+@cli.group()
+def create():
+    pass
+
+@create.command()
+@click.argument('vlanid')
+def classifier(vlanid):
+    #classifierVals = {'untagged': False, 'taggedClassifiers': [{'vlanid': vlanid}]}
+    #print("vlanID var is: ", vlanid)
+    vlanIdDict = {'vlanid': vlanid}
+    rendered_template = createClassifiers.render(vlanIdDict)
+    #print(rendered_template)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+
 #if __name__ == "__main__":
 #    cli()
-
-
-
