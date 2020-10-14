@@ -1,9 +1,9 @@
-
 from ncclient import manager
 import requests
 import untangle
 import click
 from jinja2 import Template
+from prettytable import PrettyTable
 #import yaml
 
 
@@ -152,15 +152,35 @@ def view_interfaces(obj):
         of interest for Interfaces(i.e. Forwarding Domains) tags.
         No return value.
     '''
+    x = PrettyTable()
+    x.field_names = ["Interface", "Operational Status", "IP Address"]
+    x.align["Interface"] = "l"
+    x.align["IP Address"] = "l"
     try:
         for item in obj.rpc_reply.data.interfaces.interface:
-            if len(item.name.cdata) > 2:
-                print()
-                print('Interface Name: ', item.name.cdata)
-            # print('IP Address: ', item.ipv4.addresses.ip.cdata)
-
+            if (len(item.name.cdata) > 2) and ((item.name.cdata) != "remote"):
+                fullIp = item.ipv4.addresses.address.config.ip.cdata + "/" + item.ipv4.addresses.address.config.prefix_length.cdata
+                x.add_row([item.name.cdata, item.state.oper_status.cdata, fullIp])
     except:
         print("No Interfaces found")
+    print(x)
+
+def view_sr(obj):
+    ''' Takes an Untangle Object as Input, parses it, and prints out Field names and values
+        of interest for Segment-Routing tags.
+        No return value.
+    '''
+    print("TESTING*****: ", obj.rpc_reply.data.segment_routing.srgb.lower_bound.cdata)
+    #    try:
+    for item in obj.rpc_reply.data.segment_routing.connected_prefix_sid_map:
+        print()
+        print('Prefix: ', item.prefix.cdata)
+        print('Prefix: ', item.prefix.cdata)
+        print('Interfaces: ', item.interface.cdata)
+        # print('IP Address: ', item.ipv4.addresses.ip.cdata)
+#    except:
+#        print("No prefixes found")
+
 
 classifiers_filter = '''
     <filter xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:ncx="http://netconfcentral.org/ns/yuma-ncx">
@@ -171,11 +191,11 @@ classifiers_filter = '''
     </filter>
     '''
 
-createClassifiers = Template('''
-        <config>  
+editClassifiers = Template('''
+        <config>
           <classifiers>
             {% if vlanid=='untagged'  %}
-                <classifier>
+                <classifier operation="{{operation}}">
                 <name>Untagged</name>
                 <filter-entry>
                     <filter-parameter xmlns:classifier="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-mef-classifier">classifier:vtag-stack</filter-parameter>
@@ -184,7 +204,7 @@ createClassifiers = Template('''
                 </filter-entry>
                 </classifier>
             {% else %}
-                <classifier operation="replace">
+                <classifier operation="{{operation}}">
                 <name>VLAN{{vlanid}}</name>
                 <filter-entry>
                     <filter-parameter xmlns:classifier="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-mef-classifier">classifier:vtag-stack</filter-parameter>
@@ -246,15 +266,24 @@ interfaces_filter = '''
         </filter>
     '''
 
+sr_filter = '''
+        <filter xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:ncx="http://netconfcentral.org/ns/yuma-ncx">
+          <segment-routing xmlns="urn:ciena:params:xml:ns:yang:ciena-pn:ciena-sr">
+          </segment-routing>
+        </filter>
+    '''
 
 
 
-creds = {'ip': '10.181.35.55', 'user': 'user', 'pwd': 'ciena123'}
+
+creds = {'ip': '10.181.34.2', 'user': 'user', 'pwd': 'ciena123'}
 
 @click.group()
 def cli():
     pass
 
+
+###### Show commands ########
 @cli.group()
 def show():
     pass
@@ -289,10 +318,13 @@ def interfaces():
     dnfvi_obj = get_nc_obj(creds, interfaces_filter)
     view_interfaces(dnfvi_obj)
 
-@cli.group()
-def create():
-    pass
+@show.command()
+def sr():
+    dnfvi_obj = get_nc_obj(creds, sr_filter)
+    print(dnfvi_obj)
+    view_sr(dnfvi_obj)
 
+###### Create commands ########
 @cli.group()
 def create():
     pass
@@ -300,12 +332,33 @@ def create():
 @create.command()
 @click.argument('vlanid')
 def classifier(vlanid):
-    #classifierVals = {'untagged': False, 'taggedClassifiers': [{'vlanid': vlanid}]}
-    #print("vlanID var is: ", vlanid)
-    vlanIdDict = {'vlanid': vlanid}
-    rendered_template = createClassifiers.render(vlanIdDict)
-    #print(rendered_template)
+    vlanIdDict = {'operation': 'replace', 'vlanid': vlanid}
+    rendered_template = editClassifiers.render(vlanIdDict)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
 
-#if __name__ == "__main__":
-#    cli()
+'''
+@create.command()
+@click.argument('mode', narg=1)
+@click.argument('sfInterfaces', narg=-1)
+@click.argument('vlanid', narg=1)
+#>tenx create sffs vpws 666 1 vnet-0
+def sffs(mode, sfInterfaces, vlanid):
+    varsDict = {'operation': 'replace', 'mode': mode, 'sfInterfaces': sfInterfaces, 'vlanid': vlanid}
+    rendered_template = editSffs.render(varsDict)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+'''
+
+
+
+
+###### Delete commands ########
+@cli.group()
+def delete():
+    pass
+
+@delete.command()
+@click.argument('vlanid')
+def classifier(vlanid):
+    vlanIdDict = {'operation': 'delete','vlanid': vlanid}
+    rendered_template = editClassifiers.render(vlanIdDict)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
