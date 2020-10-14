@@ -1,5 +1,15 @@
-- Single line format for "shows" to allow for grep pipeline
-- Color added to single line for clarity?
-- NodeName context??
+Mandatory before demo'ing
+=========================
+
+- Table output for all DNFVI shows(classifier/sffs/sfs/files)
+- Full DNFVI use case(create/delete for sffs,sfs and files)
+- Nodename solution for which node to address. Environment Variables?
+- Change program name/directory to myTenX
+
+
+Next Steps??
+=============
+
+- Color added to single line for clarity? Low-priority item
 - Command completion?
-- 
+- tenx wipe to erase all the annoying "remote-fpXX" flow-points and remote-FD

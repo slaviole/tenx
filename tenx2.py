@@ -51,7 +51,6 @@ def view_clsfr(obj):
         of interest for Classifer tags.
         No return value.
     '''
-    '''
     try:
         for clsfr in obj.rpc_reply.data.classifiers.classifier:
             print('')
@@ -69,32 +68,6 @@ def view_clsfr(obj):
                 pass
     except:
         print("No Classifiers found.")
-    '''
-
-    print()
-    x = PrettyTable()
-    x.field_names = ["Name", "VlanID/Untagged"]
-    x.align["Name"] = "l"
-
-    try:
-        for clsfr in obj.rpc_reply.data.classifiers.classifier:
-            try:
-                if (clsfr.filter_entry.untagged_exclude_priority_tagged.cdata):
-                    vlanid_untagged = "Untagged"
-            except:
-                vlanid_untagged = clsfr.filter_entry.vtags.vlan_id.cdata
-
-            x.add_row([clsfr.name.cdata, vlanid_untagged])
-    except:
-        print("No Classifiers found.")
-    print(x)
-
-
-
-
-
-
-
 
 def view_sffs(obj):
     ''' Takes an Untangle Object as Input, parses it, and prints out Field names and values
