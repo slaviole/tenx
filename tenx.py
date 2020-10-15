@@ -13,6 +13,19 @@ def get_nc_obj(nc_creds, filter):
     ''' Takes D-NFVI server login credentials, makes a Netconf get for all config and oper data.
         Returns an Untangle object with the parsed xml tree.
     '''
+
+    ''' node = os.environ.get('NODE')
+    print("Node is " + str(node))
+    nc_creds['ip'] = os.getenv('NODE')
+    print("NC_CREDS dict are " + str(nc_creds))'''
+    file = open("/home/slaviole/activenode.txt", "r")
+    if file.mode == 'r':
+        activenode = file.read()
+    else:
+        activenode = "3906_1"
+    nc_creds['ip'] = nodes[activenode]
+    print()
+    print(f"[{activenode}]")
     with manager.connect(host=nc_creds['ip'],
                              port=830,
                              username=nc_creds['user'],
@@ -31,6 +44,14 @@ def edit_nc_obj(nc_creds, template):
     ''' Takes D-NFVI server login credentials, makes a Netconf get for all config and oper data.
         Returns an Untangle object with the parsed xml tree.
     '''
+    file = open("/home/slaviole/activenode.txt", "r")
+    if file.mode == 'r':
+        activenode = file.read()
+    else:
+        activenode = "3906_1"
+    nc_creds['ip'] = nodes[activenode]
+    print()
+    print(f"[{activenode}]")
     with manager.connect(host=nc_creds['ip'],
                              port=830,
                              username=nc_creds['user'],
@@ -71,7 +92,6 @@ def view_clsfr(obj):
         print("No Classifiers found.")
     '''
 
-    print()
     x = PrettyTable()
     x.field_names = ["Name", "VlanID/Untagged"]
     x.align["Name"] = "l"
@@ -168,7 +188,7 @@ def view_fps(obj):
     try:
         for item in obj.rpc_reply.data.fps.fp:
             print()
-            print('Fp Name: ', item.name.cdata)
+            print('FP Name: ', item.name.cdata)
             print('FD Name: ', item.fd_name.cdata)
             print('Logical Port: ', item.logical_port.cdata)
 
@@ -304,7 +324,15 @@ sr_filter = '''
 
 
 
-creds = {'ip': '10.181.35.55', 'user': 'user', 'pwd': 'ciena123'}
+nodes = {"3906_1": "10.181.35.55",
+        "3906_2": "10.181.35.57",
+        "5170_93": "10.181.34.2",
+        "5170_94": "10.181.34.218",
+        "5162_46": "10.181.34.72",
+        }
+
+
+creds = {'ip': "10.181.35.57", 'user': 'user', 'pwd': 'ciena123'}
 
 @click.group()
 def cli():
@@ -390,3 +418,30 @@ def classifier(vlanid):
     vlanIdDict = {'operation': 'delete','vlanid': vlanid}
     rendered_template = editClassifiers.render(vlanIdDict)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
+
+
+
+####### Set Node Commands #########
+@cli.group()
+def set():
+    pass
+'''
+@set.command()
+@click.argument('name')
+def node(name):
+    os.environ['NODE'] = name
+    creds['ip'] = nodes[name]
+    print("Node is set to " + name)
+    print("IP address is " + creds['ip'])
+'''
+@set.command()
+@click.argument('name')
+def node(name):
+    ###################################################################
+    # Add error checking for node name to see if the node is in the dict
+    ####################################################################
+    file = open("/home/slaviole/activenode.txt", "w")
+    file.write(name)
+    file.close()
+
+

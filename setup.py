@@ -5,6 +5,7 @@ setup(
         version = '1.0',
         py_modules = ['tenx'],
         install_requires =  [
+            'os',
             'click',
             'requests',
             'untangle',
