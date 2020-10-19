@@ -1,15 +1,16 @@
 Mandatory before demo'ing
 =========================
 
+- Add all Docstrings for working help menus.
 - Table output for all DNFVI shows(classifier/sffs/sfs/files)
-- Full DNFVI use case(create/delete for sffs,sfs and files)
-- Nodename solution for which node to address. Environment Variables?
-- Change program name/directory to myTenX
+
+
 
 
 Next Steps??
 =============
 
+- Change program name/directory to myTenX
 - Color added to single line for clarity? Low-priority item
 - Command completion?
 - tenx wipe to erase all the annoying "remote-fpXX" flow-points and remote-FD
