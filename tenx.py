@@ -6,8 +6,6 @@ import untangle
 import click
 from jinja2 import Template
 from prettytable import PrettyTable
-#import yaml
-
 
 
 def get_nc_obj(nc_creds, filter):
@@ -389,13 +387,120 @@ downloadStart = Template('''
 ''')
 
 
-downloadStart = Template('''
-        <file-action xmlns="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-file-mgmt">
-            <file-name>{{ image }}</file-name>
-            <action>download</action>
-        </file-action>
+editFds = Template('''
+    <config>
+        <fds xmlns="urn:ciena:params:xml:ns:yang:ciena-pn:ciena-mef-fd">
+            <fd>
+                <name>v{{ vlanid }}</name>
+                <mode>vpls</mode>
+            </fd>
+        </fds>
+    </config>
 ''')
 
+
+editInterfaces = Template('''
+    <config>
+        <interfaces xmlns="http://openconfig.net/yang/interfaces">
+            <interface>
+                <name>int{{ port }}v{{ vlanid }}</name>
+                <config>
+                    <name>int{{ port }}v{{ vlanid }}</name>
+                    <mtu>1500</mtu>
+                    <type xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">ip</type>
+                    <admin-status xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">true</admin-status>
+                    <role xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces" xmlns:cn-if="http://ciena.com/ns/yang/ciena-openconfig-interfaces">cn-if:data</role>
+                    <vrfName xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">default</vrfName>
+                    <stats-collection xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">on</stats-collection>
+                    <underlay-binding xmlns="http://ciena.com/ns/yang/ciena-underlay-binding">
+                        <config>
+                            <fd>v{{ vlanid }}</fd>
+                        </config>
+                    </underlay-binding>
+                </config>
+                <ipv4 xmlns="http://ciena.com/ns/yang/ciena-openconfig-if-ip">
+                    <addresses>
+                        <address>
+                            <ip>{{ portIp }}</ip>
+                            <config>
+                                <ip>{{ portIp }}</ip>
+                                <prefix-length>30</prefix-length>
+                            </config>
+                        </address>
+                    </addresses>
+                </ipv4>
+            </interface>
+        </interfaces>
+    </config>
+
+''')
+
+editIsisInterface = Template('''
+    <config>
+        <isis xmlns="http://ciena.com/ns/yang/ciena-isis">
+            <instance>
+                <tag>ISIS1</tag>
+                <interfaces>
+                    <interface>
+                        <name>int{{ port }}v{{ vlanid }}</name>
+                        <interface-type>point-to-point</interface-type>
+                        <level-type>level-{{ isislvl }}</level-type>
+                        <lsp-interval>33</lsp-interval>
+                        <lsp-retransmit-interval>5</lsp-retransmit-interval>
+                        <hello-padding>true</hello-padding>
+                        <ipv4-unicast-default-disable>false</ipv4-unicast-default-disable>
+                        <level-1>
+                        <hello-interval>10</hello-interval>
+                        <hello-multiplier>3</hello-multiplier>
+                        <csnp-interval>10</csnp-interval>
+                        <priority>64</priority>
+                        <metric>10</metric>
+                        <wide-metric>10</wide-metric>
+                        <lfa-candidate-enable>true</lfa-candidate-enable>
+                        </level-1>
+                        <level-2>
+                        <hello-interval>10</hello-interval>
+                        <hello-multiplier>3</hello-multiplier>
+                        <csnp-interval>10</csnp-interval>
+                        <priority>64</priority>
+                        <metric>10</metric>
+                        <wide-metric>10</wide-metric>
+                        <lfa-candidate-enable>true</lfa-candidate-enable>
+                        </level-2>
+                        <bfd>
+                            <enable>false</enable>
+                        </bfd>
+                    </interface>
+                </interfaces>
+            </instance>
+        </isis>
+    </config>
+''')
+
+editFps = Template('''
+    <config>
+        <fps xmlns="urn:ciena:params:xml:ns:yang:ciena-pn:ciena-mef-fp">
+            <fp>
+                <name>p{{ port }}v{{ vlanid }}</name>
+                <fd-name>v{{ vlanid }}</fd-name>
+                <logical-port>{{ port }}</logical-port>
+                <mtu-size>9000</mtu-size>
+                <classifier-list-precedence>{{ vlanid}}</classifier-list-precedence>
+                <classifier-list>VLAN{{ vlanid }}</classifier-list>
+                <stats-collection>on</stats-collection>
+                <egress-l2-transform>
+                    <egress-name>push-0x8100.{{ vlanid }}.7</egress-name>
+                    <vlan-stack>
+                        <tag>1</tag>
+                        <push-tpid>tpid-8100</push-tpid>
+                        <push-pcp>pcp-7</push-pcp>
+                        <push-vid>{{ vlanid }}</push-vid>
+                    </vlan-stack>
+                </egress-l2-transform>
+            </fp>
+        </fps>
+    </config>
+''')
 
 sffs_filter = '''
     <filter xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:ncx="http://netconfcentral.org/ns/yuma-ncx">
@@ -559,6 +664,32 @@ def sfs(vnfname, numcpus, mem, sfinterfaces):
     print(rendered_template)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
 
+@create.command()
+@click.option('--isislvl', default=1, help="Specify ISIS level '1' or '2'. Default =1")
+@click.argument('ip_and_mask', nargs=1)
+@click.argument('port', nargs=1)
+@click.argument('vlanid', nargs=1)
+def ipinterface(ip_and_mask, port, vlanid, isislvl):
+    """ Creates a port IP Interface and associated objects incl optionals.
+        Format is: 'tenx create ipinterface 10.181.37.1/30 20 668'. """
+    vlanIdDict = {'operation': 'replace', 'vlanid': vlanid}
+    rendered_template = editClassifiers.render(vlanIdDict)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+    rendered_template = editFds.render(vlanIdDict)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+    maskIndex = ip_and_mask.find("/")
+    portIp = ip_and_mask[0:maskIndex]
+    mask = ip_and_mask[maskIndex+1:]
+    vlanIdDict = {'operation': 'replace', 'vlanid': vlanid, 'portIp': portIp, 'port': port}
+    rendered_template = editInterfaces.render(vlanIdDict)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+    objDict = {'operation': 'replace', 'vlanid': vlanid, 'port': port, 'isislvl': isislvl}
+    rendered_template = editIsisInterface.render(objDict)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+    objDict = {'operation': 'replace', 'vlanid': vlanid, 'port': port}
+    rendered_template = editFps.render(objDict)
+    print(rendered_template)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
 
 
 
@@ -589,6 +720,7 @@ def sfs(vnfname):
     rendered_template = editSfs.render(varsDict)
     print(rendered_template)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
+
 
 ###### Start SFS command ########
 @cli.group()
@@ -646,5 +778,3 @@ def node(name):
         print("Addressed node is set to " + name)
     else:
         print("Nodename is not in list of valid nodes. Please try again.")
-
-
