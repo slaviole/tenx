@@ -1,7 +1,0 @@
-tenx.py
-tenx.egg-info/PKG-INFO
-tenx.egg-info/SOURCES.txt
-tenx.egg-info/dependency_links.txt
-tenx.egg-info/entry_points.txt
-tenx.egg-info/requires.txt
-tenx.egg-info/top_level.txt

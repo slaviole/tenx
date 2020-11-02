@@ -1,7 +1,7 @@
-PTable
 click
 jinja2
 ncclient
+prettytable
 pyaml
 requests
 untangle

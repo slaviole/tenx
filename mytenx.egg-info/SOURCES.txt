@@ -1,0 +1,7 @@
+mytenx.py
+mytenx.egg-info/PKG-INFO
+mytenx.egg-info/SOURCES.txt
+mytenx.egg-info/dependency_links.txt
+mytenx.egg-info/entry_points.txt
+mytenx.egg-info/requires.txt
+mytenx.egg-info/top_level.txt

@@ -1,16 +1,16 @@
 Mandatory before demo'ing
 =========================
 
-- Add all Docstrings for working help menus.
+- Add logical-ports command and add it to the ipinterfaces command
+- Get it working in Windows cmd shell
+- Add all Docstrings for working help menus(D-NFVI use case first).
 - Table output for all DNFVI shows(classifier/sffs/sfs/files)
-
-
+- Create solid overview Deck
+- Add argument validation(D-NFVI first)
+- Clean up exceptions for config conflicts to focus on RPC reply message
 
 
 Next Steps??
 =============
 
-- Change program name/directory to myTenX
 - Color added to single line for clarity? Low-priority item
-- Command completion?
-- tenx wipe to erase all the annoying "remote-fpXX" flow-points and remote-FD

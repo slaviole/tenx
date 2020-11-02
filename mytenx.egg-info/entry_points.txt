@@ -1,4 +1,4 @@
 
             [console_scripts]
-            tenx=tenx:cli
+            mytenx=mytenx:cli
             

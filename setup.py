@@ -1,21 +1,20 @@
 from setuptools import setup
 
 setup(
-        name = 'tenx',
+        name = 'mytenx',
         version = '1.0',
-        py_modules = ['tenx'],
+        py_modules = ['mytenx'],
         install_requires =  [
-            'os',
             'click',
             'requests',
             'untangle',
             'pyaml',
             'ncclient',
             'jinja2',
-            'PTable'
+            'prettytable'
             ],
         entry_points='''
             [console_scripts]
-            tenx=tenx:cli
+            mytenx=mytenx:cli
             '''
         )

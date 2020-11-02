@@ -4,8 +4,8 @@ from ncclient.xml_ import to_ele
 import requests
 import untangle
 import click
-from jinja2 import Template
 from prettytable import PrettyTable
+from mytenxtemplates import *
 
 
 def get_nc_obj(nc_creds, filter):
@@ -134,13 +134,6 @@ def view_clsfr(obj):
         print("No Classifiers found.")
     print(x)
 
-
-
-
-
-
-
-
 def view_sffs(obj):
     ''' Takes an Untangle Object as Input, parses it, and prints out Field names and values
         of interest for sffs(i.e. service chains) tags.
@@ -148,7 +141,6 @@ def view_sffs(obj):
     '''
     try:
         for fd in obj.rpc_reply.data.sffs.sff:
-            print()
             print('SFF Name: ', fd.sff_name.cdata)
             print('SFF Mode:', fd.sff_mode.cdata)
             for fp in fd.interface:
@@ -168,8 +160,6 @@ def view_sfs(obj):
         line = 30 * "*"
         num_sfs = len(obj.rpc_reply.data.sfs)
         for item in obj.rpc_reply.data.sfs.sf:
-            print("")
-            print("")
             print(item.sf_name.cdata)
             print(line)
             print("CPUs Assigned: ", item.sf_state.num_cpus.cdata)
@@ -255,6 +245,8 @@ def view_sr(obj):
 #        print("No prefixes found")
 
 
+
+
 classifiers_filter = '''
     <filter xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:ncx="http://netconfcentral.org/ns/yuma-ncx">
         <classifiers xmlns="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-mef-classifier">
@@ -263,244 +255,6 @@ classifiers_filter = '''
         </classifiers>
     </filter>
     '''
-
-editClassifiers = Template('''
-    <config>
-        <classifiers>
-        {% if vlanid=='untagged'  %}
-            <classifier operation="{{operation}}">
-            <name>Untagged</name>
-            <filter-entry>
-                <filter-parameter xmlns:classifier="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-mef-classifier">classifier:vtag-stack</filter-parameter>
-                <logical-not>false</logical-not>
-                <untagged-exclude-priority-tagged>true</untagged-exclude-priority-tagged>
-            </filter-entry>
-            </classifier>
-        {% else %}
-            <classifier operation="{{operation}}">
-            <name>VLAN{{vlanid}}</name>
-            <filter-entry>
-                <filter-parameter xmlns:classifier="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-mef-classifier">classifier:vtag-stack</filter-parameter>
-                <logical-not>false</logical-not>
-                <vtags>
-                <tag>1</tag>
-                <vlan-id>{{vlanid}}</vlan-id>
-                </vtags>
-            </filter-entry>
-            </classifier>
-        {% endif %}
-        </classifiers>
-    </config>
-    ''')
-
-editSffs = Template('''
-    <config>
-        <sffs xmlns="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-sfc">
-            <sff operation="{{operation}}">
-            <sff-name>SFFS-{{ vlanid }}</sff-name>
-            {% if operation == "replace" %}
-                <sff-mode>{{mode}}</sff-mode>
-                {% for interface in sfinterfaces %}
-                    <interface>
-                        <name>sf-{{ interface }}</name>
-                        <logical-port>{{ interface }}</logical-port>
-                        <classifier-list>VLAN{{ vlanid }}</classifier-list>
-                    </interface>
-                {% endfor %}
-            {% endif %}
-            </sff>
-        </sffs>
-    </config>
-    ''')
-
-editSfs = Template('''
-    <config>
-        <sfs xmlns="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-sf">
-            <sf operation="{{ operation }}">
-            <sf-name>{{ vnfname }}</sf-name>
-            {% if operation == "replace"%}
-            <sfo>
-                <image-mgmt>
-                <image-ref>{{ vnfname }}</image-ref>
-                </image-mgmt>
-                <sfo-metadata>
-                    <cpus>{{ numcpus }}</cpus>
-                    <memory>{{ mem }}</memory>
-                </sfo-metadata>
-                <network-interface>
-                    <name>mgmt</name>
-                    <network-type>default</network-type>
-                </network-interface>
-                {% for sfIf in sfinterfaces %}
-                <network-interface>
-                    <name>SFvnet{{ sfIf }}</name>
-                    <network-type>vhost</network-type>
-                    <logical-port>vnet-{{ sfIf }}</logical-port>
-                </network-interface>
-                {% endfor %}
-            </sfo>
-            {% endif %}
-            </sf>
-        </sfs>
-    </config>
-    ''')
-
-startSfs = Template('''
-    <config>
-        <sfs xmlns="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-sf">
-            <sf>
-            <sf-name>{{ vnfname }}</sf-name>
-            <sf-operation>
-                <state>start</state>
-            </sf-operation>
-            </sf>
-        </sfs>
-    </config>
-''')
-
-
-downloadFile = Template('''
-        <config>
-            <files xmlns="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-file-mgmt">
-                <file>
-                    <file-name>{{ image }}</file-name>
-                    <file-mgmt>
-                        <file-identifier>{{ image }}</file-identifier>
-                        <file-download-uri>{{ image_path }}{{ image }}.qcow2</file-download-uri>
-                        <file-download-size>{{ image_size }}</file-download-size>
-                        <file-max-size>{{ image_max_size }}</file-max-size>
-                        <checksum-uri>{{ image_path }}{{ image }}.md5</checksum-uri>
-                        <checksum-type>md5</checksum-type>
-                        <username>{{ sftp_user }}</username>
-                        <password>{{ sftp_pwd }}</password>
-                    </file-mgmt>
-                </file>
-            </files>
-        </config>
-''')
-
-downloadStart = Template('''
-            <file-action xmlns="urn:ciena:params:xml:ns:yang:ciena-pn::ciena-file-mgmt">
-                    <file-name>{{ image }}</file-name>
-                    <action>download</action>
-            </file-action>
-''')
-
-
-editFds = Template('''
-    <config>
-        <fds xmlns="urn:ciena:params:xml:ns:yang:ciena-pn:ciena-mef-fd">
-            <fd>
-                <name>v{{ vlanid }}</name>
-                <mode>vpls</mode>
-            </fd>
-        </fds>
-    </config>
-''')
-
-
-editInterfaces = Template('''
-    <config>
-        <interfaces xmlns="http://openconfig.net/yang/interfaces">
-            <interface>
-                <name>int{{ port }}v{{ vlanid }}</name>
-                <config>
-                    <name>int{{ port }}v{{ vlanid }}</name>
-                    <mtu>1500</mtu>
-                    <type xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">ip</type>
-                    <admin-status xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">true</admin-status>
-                    <role xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces" xmlns:cn-if="http://ciena.com/ns/yang/ciena-openconfig-interfaces">cn-if:data</role>
-                    <vrfName xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">default</vrfName>
-                    <stats-collection xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">on</stats-collection>
-                    <underlay-binding xmlns="http://ciena.com/ns/yang/ciena-underlay-binding">
-                        <config>
-                            <fd>v{{ vlanid }}</fd>
-                        </config>
-                    </underlay-binding>
-                </config>
-                <ipv4 xmlns="http://ciena.com/ns/yang/ciena-openconfig-if-ip">
-                    <addresses>
-                        <address>
-                            <ip>{{ portIp }}</ip>
-                            <config>
-                                <ip>{{ portIp }}</ip>
-                                <prefix-length>30</prefix-length>
-                            </config>
-                        </address>
-                    </addresses>
-                </ipv4>
-            </interface>
-        </interfaces>
-    </config>
-
-''')
-
-editIsisInterface = Template('''
-    <config>
-        <isis xmlns="http://ciena.com/ns/yang/ciena-isis">
-            <instance>
-                <tag>ISIS1</tag>
-                <interfaces>
-                    <interface>
-                        <name>int{{ port }}v{{ vlanid }}</name>
-                        <interface-type>point-to-point</interface-type>
-                        <level-type>level-{{ isislvl }}</level-type>
-                        <lsp-interval>33</lsp-interval>
-                        <lsp-retransmit-interval>5</lsp-retransmit-interval>
-                        <hello-padding>true</hello-padding>
-                        <ipv4-unicast-default-disable>false</ipv4-unicast-default-disable>
-                        <level-1>
-                        <hello-interval>10</hello-interval>
-                        <hello-multiplier>3</hello-multiplier>
-                        <csnp-interval>10</csnp-interval>
-                        <priority>64</priority>
-                        <metric>10</metric>
-                        <wide-metric>10</wide-metric>
-                        <lfa-candidate-enable>true</lfa-candidate-enable>
-                        </level-1>
-                        <level-2>
-                        <hello-interval>10</hello-interval>
-                        <hello-multiplier>3</hello-multiplier>
-                        <csnp-interval>10</csnp-interval>
-                        <priority>64</priority>
-                        <metric>10</metric>
-                        <wide-metric>10</wide-metric>
-                        <lfa-candidate-enable>true</lfa-candidate-enable>
-                        </level-2>
-                        <bfd>
-                            <enable>false</enable>
-                        </bfd>
-                    </interface>
-                </interfaces>
-            </instance>
-        </isis>
-    </config>
-''')
-
-editFps = Template('''
-    <config>
-        <fps xmlns="urn:ciena:params:xml:ns:yang:ciena-pn:ciena-mef-fp">
-            <fp>
-                <name>p{{ port }}v{{ vlanid }}</name>
-                <fd-name>v{{ vlanid }}</fd-name>
-                <logical-port>{{ port }}</logical-port>
-                <mtu-size>9000</mtu-size>
-                <classifier-list-precedence>{{ vlanid}}</classifier-list-precedence>
-                <classifier-list>VLAN{{ vlanid }}</classifier-list>
-                <stats-collection>on</stats-collection>
-                <egress-l2-transform>
-                    <egress-name>push-0x8100.{{ vlanid }}.7</egress-name>
-                    <vlan-stack>
-                        <tag>1</tag>
-                        <push-tpid>tpid-8100</push-tpid>
-                        <push-pcp>pcp-7</push-pcp>
-                        <push-vid>{{ vlanid }}</push-vid>
-                    </vlan-stack>
-                </egress-l2-transform>
-            </fp>
-        </fps>
-    </config>
-''')
 
 sffs_filter = '''
     <filter xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" xmlns:ncx="http://netconfcentral.org/ns/yuma-ncx">
@@ -674,19 +428,24 @@ def ipinterface(ip_and_mask, port, vlanid, isislvl):
         Format is: 'tenx create ipinterface 10.181.37.1/30 20 668'. """
     vlanIdDict = {'operation': 'replace', 'vlanid': vlanid}
     rendered_template = editClassifiers.render(vlanIdDict)
+    print(rendered_template)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
     rendered_template = editFds.render(vlanIdDict)
+    print(rendered_template)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
     maskIndex = ip_and_mask.find("/")
     portIp = ip_and_mask[0:maskIndex]
     mask = ip_and_mask[maskIndex+1:]
     vlanIdDict = {'operation': 'replace', 'vlanid': vlanid, 'portIp': portIp, 'port': port}
     rendered_template = editInterfaces.render(vlanIdDict)
+    print(rendered_template)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
     objDict = {'operation': 'replace', 'vlanid': vlanid, 'port': port, 'isislvl': isislvl}
     rendered_template = editIsisInterface.render(objDict)
+    print(rendered_template)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
-    objDict = {'operation': 'replace', 'vlanid': vlanid, 'port': port}
+    fps = [f"p{ port }int{ vlanid }"]
+    objDict = {'operation': 'replace', 'vlanid': vlanid, 'port': port, 'fps': fps}
     rendered_template = editFps.render(objDict)
     print(rendered_template)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
@@ -703,6 +462,7 @@ def delete():
 def classifier(vlanid):
     vlanIdDict = {'operation': 'delete','vlanid': vlanid}
     rendered_template = editClassifiers.render(vlanIdDict)
+    print(rendered_template)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
 
 @delete.command()
@@ -720,6 +480,46 @@ def sfs(vnfname):
     rendered_template = editSfs.render(varsDict)
     print(rendered_template)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
+
+@delete.command()
+@click.argument('port',nargs=1)
+@click.argument('vlanid',nargs=1)
+def fps(port, vlanid):
+    name = f"p{ port }int{ vlanid }"
+    print(name)
+    varsDict = {'operation': 'delete','name': name}
+    print(varsDict)
+    rendered_template = editFps.render(varsDict)
+    print(rendered_template)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+
+@delete.command()
+def ztpdefaults():
+    fps = []
+    for x in range(1,45):
+        fps.append(f"remote-fp{x}")
+    fpsDict = {'operation': 'remove',"fps": fps}
+    print(fpsDict)
+    print(type(fpsDict))
+    rendered_template = editFps.render(fpsDict)
+    print(rendered_template)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+    interfaceDict = {'operation': 'remove', 'interfaces': ['remote']}
+    rendered_template = editDhcp.render(interfaceDict)
+    print(rendered_template)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+    rendered_template = editDhcpv6.render(interfaceDict)
+    print(rendered_template)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+    rendered_template = editInterfaces.render(interfaceDict)
+    print(rendered_template)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+    fds = ["remote-fd"]
+    fdsDict = {'operation': 'remove',"fds": fds}
+    rendered_template = editFds.render(fdsDict)
+    print(rendered_template)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+
 
 
 ###### Start SFS command ########

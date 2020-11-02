@@ -1,0 +1,226 @@
+
+    <config>
+        <fps xmlns="urn:ciena:params:xml:ns:yang:ciena-pn:ciena-mef-fp">
+            
+            <fp operation="remove">
+                <name>remote-fp1</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp2</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp3</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp4</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp5</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp6</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp7</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp8</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp9</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp10</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp11</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp12</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp13</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp14</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp15</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp16</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp17</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp18</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp19</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp20</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp21</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp22</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp23</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp24</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp25</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp26</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp27</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp28</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp29</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp30</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp31</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp32</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp33</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp34</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp35</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp36</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp37</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp38</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp39</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp40</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp41</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp42</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp43</name>
+                
+            </fp>
+            
+            <fp operation="remove">
+                <name>remote-fp44</name>
+                
+            </fp>
+            
+        </fps>
+    </config>
