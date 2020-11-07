@@ -4,6 +4,7 @@ from ncclient.xml_ import to_ele
 import requests
 import untangle
 import click
+from click_shell import shell
 from prettytable import PrettyTable
 from mytenxtemplates import *
 
@@ -335,11 +336,18 @@ imageSpecs = {
     }
 }
 
+file = open("/home/slaviole/activenode.txt", "r")
+if file.mode == 'r':
+    activenode = file.read()
+    os.environ['ACTIVENODE'] = activenode
+    print()
+else:
+    print('Error reading activenode input file')
 
-@click.group()
+#@click.group()
+@shell(prompt='myTenx > ', intro=f'Starting myTenx shell with node { activenode }...')
 def cli():
     pass
-
 
 ###### Show commands ########
 @cli.group()
@@ -375,13 +383,13 @@ def fps():
 def interfaces():
     dnfvi_obj = get_nc_obj(creds, interfaces_filter)
     view_interfaces(dnfvi_obj)
-
+'''
 @show.command()
 def sr():
     dnfvi_obj = get_nc_obj(creds, sr_filter)
     print(dnfvi_obj)
     view_sr(dnfvi_obj)
-
+'''
 
 ###### Create commands ########
 @cli.group()
@@ -430,25 +438,29 @@ def ipinterface(ip_and_mask, port, vlanid, isislvl):
     rendered_template = editClassifiers.render(vlanIdDict)
     print(rendered_template)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
+    fds = [{'vlanid': vlanid}]
+    vlanIdDict = {'operation': 'replace', "fds": fds}
     rendered_template = editFds.render(vlanIdDict)
     print(rendered_template)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
     maskIndex = ip_and_mask.find("/")
     portIp = ip_and_mask[0:maskIndex]
     mask = ip_and_mask[maskIndex+1:]
-    vlanIdDict = {'operation': 'replace', 'vlanid': vlanid, 'portIp': portIp, 'port': port}
+    interfaces = [{'name': f"int{ port }v{ vlanid }",  'portIp': portIp, 'mask': mask, 'vlanid': vlanid}]
+    vlanIdDict = {'operation': 'replace', 'interfaces': interfaces}
+    print(vlanIdDict)
     rendered_template = editInterfaces.render(vlanIdDict)
     print(rendered_template)
-    dnfvi_obj = edit_nc_obj(creds, rendered_template)
-    objDict = {'operation': 'replace', 'vlanid': vlanid, 'port': port, 'isislvl': isislvl}
-    rendered_template = editIsisInterface.render(objDict)
-    print(rendered_template)
-    dnfvi_obj = edit_nc_obj(creds, rendered_template)
-    fps = [f"p{ port }int{ vlanid }"]
-    objDict = {'operation': 'replace', 'vlanid': vlanid, 'port': port, 'fps': fps}
-    rendered_template = editFps.render(objDict)
-    print(rendered_template)
-    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+    #dnfvi_obj = edit_nc_obj(creds, rendered_template)
+    #objDict = {'operation': 'replace', 'vlanid': vlanid, 'port': port, 'isislvl': isislvl}
+    #rendered_template = editIsisInterface.render(objDict)
+    #print(rendered_template)
+    #dnfvi_obj = edit_nc_obj(creds, rendered_template)
+    #fps = [f"p{ port }int{ vlanid }"]
+    #objDict = {'operation': 'replace', 'vlanid': vlanid, 'port': port, 'fps': fps}
+    #rendered_template = editFps.render(objDict)
+    #print(rendered_template)
+    #dnfvi_obj = edit_nc_obj(creds, rendered_template)
 
 
 

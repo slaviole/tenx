@@ -6,6 +6,7 @@ setup(
         py_modules = ['mytenx'],
         install_requires =  [
             'click',
+            'click-shell',
             'requests',
             'untangle',
             'pyaml',

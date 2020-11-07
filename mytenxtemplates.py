@@ -128,7 +128,7 @@ editFds = Template('''
         <fds xmlns="urn:ciena:params:xml:ns:yang:ciena-pn:ciena-mef-fd">
         {% for fd in fds %}
             <fd operation="{{ operation }}">
-                <name>{{ fd }}</name>
+                <name>FD{{ fd.vlanid }}</name>
                 {% if operation == "replace" %}
                 <mode>vpls</mode>
                 {% endif %}
@@ -173,14 +173,14 @@ editInterfaces = Template('''
            {% for interface in interfaces %}
             {% if operation == "remove" %}
                 <interface xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="{{ operation }}">
-                    <name>{{ interface }}</name>
+                    <name>{{  interface.name }}</name>
                 </interface>
             {% endif %}
             {% if operation == "replace" %}
             <interface xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="{{ operation }}">
-                <name>int{{ port }}v{{ vlanid }}</name>
+                <name>{{ interface.name }}</name>
                 <config>
-                    <name>int{{ port }}v{{ vlanid }}</name>
+                    <name>{{ interface.name }}</name>
                     <mtu>1500</mtu>
                     <type xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">ip</type>
                     <admin-status xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">true</admin-status>
@@ -189,17 +189,17 @@ editInterfaces = Template('''
                     <stats-collection xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">on</stats-collection>
                     <underlay-binding xmlns="http://ciena.com/ns/yang/ciena-underlay-binding">
                         <config>
-                            <fd>v{{ vlanid }}</fd>
+                            <fd>FD{{ interface.vlanid }}</fd>
                         </config>
                     </underlay-binding>
                 </config>
                 <ipv4 xmlns="http://ciena.com/ns/yang/ciena-openconfig-if-ip">
                     <addresses>
                         <address>
-                            <ip>{{ portIp }}</ip>
+                            <ip>{{ interface.portIp }}</ip>
                             <config>
-                                <ip>{{ portIp }}</ip>
-                                <prefix-length>30</prefix-length>
+                                <ip>{{ interface.portIp }}</ip>
+                                <prefix-length>{{ interface.mask }}</prefix-length>
                             </config>
                         </address>
                     </addresses>
