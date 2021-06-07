@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rpc message-id="31" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+<edit-config><target><running/></target>
+<default-operation>merge</default-operation>
+<config>
+    <interfaces xmlns="http://openconfig.net/yang/interfaces">
+        <interface>
+        <name>int15v668</name>
+        <config>
+        <name>int15v668</name>
+        <mtu>1500</mtu>
+        <admin-status xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">true</admin-status>
+        <type xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">ip</type>
+        <underlay-binding xmlns="http://ciena.com/ns/yang/ciena-underlay-binding">
+            <config>
+                <fd>v668</fd>
+            </config>
+        </underlay-binding>
+        <vrfName xmlns="http://ciena.com/ns/yang/ciena-openconfig-interfaces">default</vrfName>
+        </config>
+        </interface>
+    </interfaces>
+</config>
+</edit-config>
+</rpc>    

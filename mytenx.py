@@ -318,6 +318,10 @@ nodes = {"3906_1": "10.181.35.55",
         "5170_93": "10.181.34.2",
         "5170_94": "10.181.34.218",
         "5162_46": "10.181.34.72",
+        "5164_19": "10.181.37.183",
+        "5164_20": "10.181.37.184",
+        "5164_21": "10.181.37.185",
+        "3924_h": "192.168.1.24",
         }
 
 
@@ -426,6 +430,31 @@ def sfs(vnfname, numcpus, mem, sfinterfaces):
     print(rendered_template)
     dnfvi_obj = edit_nc_obj(creds, rendered_template)
 
+# Currently Working on
+@create.command()
+@click.argument('port', nargs=1)
+@click.argument('vlanid', nargs=1)
+@click.argument('peerip', nargs=1)
+def evpl(port, vlanid, peerip):
+    """ Creates an EVPL over SR service and associated objects incl optionals.
+        Format is: 'mytenx create evpl 25 668 10.181.37.1 2' """
+    # Enable Logical-port & set Max MTU
+    # Create Targetted LDP Peer session
+    vlanIdDict = {'operation': 'replace', 'peerip': peerip}
+    rendered_template = createTargetLdp.render(vlanIdDict)
+    print(rendered_template)
+    dnfvi_obj = edit_nc_obj(creds, rendered_template)
+    # Create Pseudowires
+    # Create Classifier
+    # Create FDS
+    # Create FPS
+    # Create L2VPN-Service
+
+
+
+
+
+#Not working
 @create.command()
 @click.option('--isislvl', default=1, help="Specify ISIS level '1' or '2'. Default =1")
 @click.argument('ip_and_mask', nargs=1)
@@ -433,7 +462,7 @@ def sfs(vnfname, numcpus, mem, sfinterfaces):
 @click.argument('vlanid', nargs=1)
 def ipinterface(ip_and_mask, port, vlanid, isislvl):
     """ Creates a port IP Interface and associated objects incl optionals.
-        Format is: 'tenx create ipinterface 10.181.37.1/30 20 668'. """
+        Format is: 'mytenx create ipinterface 10.181.37.1/30 20 668'. """
     vlanIdDict = {'operation': 'replace', 'vlanid': vlanid}
     rendered_template = editClassifiers.render(vlanIdDict)
     print(rendered_template)
@@ -461,8 +490,6 @@ def ipinterface(ip_and_mask, port, vlanid, isislvl):
     #rendered_template = editFps.render(objDict)
     #print(rendered_template)
     #dnfvi_obj = edit_nc_obj(creds, rendered_template)
-
-
 
 ###### Delete commands ########
 @cli.group()

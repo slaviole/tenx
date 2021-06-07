@@ -167,6 +167,25 @@ editFps = Template('''
     </config>
 ''')
 
+createTargetLdp = Template('''
+    <config>
+    <ldp xmlns="http://ciena.com/ns/yang/ciena/ciena-ldp">
+        <instance>
+        <tag>default</tag>
+        <target-ldp>
+            <peers>
+            <address>{{ peerip }}</address>
+            <hello-interval>5</hello-interval>
+            <hello-holdtime>15</hello-holdtime>
+            </peers>
+        </target-ldp>
+        </instance>
+    </ldp>
+    </config>
+''')
+
+
+
 editInterfaces = Template('''
     <config>
         <interfaces xmlns="http://openconfig.net/yang/interfaces">
